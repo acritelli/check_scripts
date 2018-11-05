@@ -8,7 +8,7 @@ For complete usage information, check the help: `Get-Help ./check_wsus_updates.p
 
 ### Default behavior
 
-By default, the script will check the WSUS server (localhost, if none is provided by the `-Server` argument) for the presence of any security or critical updates that need to be approved. If security updates are found, then the script returns critical. If only critical updates are found, then the script returns warning.
+By default, the script will check the WSUS server (localhost, if none is provided by the `-Server` argument) for the presence of any security or critical updates that need to be approved. If security updates are found and have not been approved (or superseded by an approved update), then the script returns critical. If only critical updates are found and have not been approved (or superseded by an approved update), then the script returns warning.
 
 To call the script with defaults, invoke it without any arguments: 
 
