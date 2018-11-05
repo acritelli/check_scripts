@@ -66,15 +66,15 @@ $updates | ForEach-Object -Process {
 }
 
 # Any unapproved security updates will result in critical
-if($classSecurityUpdates -gt 0) {
+if($classSecurityUpdates -gt 0 -and $updatesToApprove -gt 0) {
   $outputMessage +=  "CRITICAL: $classSecurityUpdates Security Updates Unapproved | "
   $exitCode = 2
-} elseif ($classCriticalUpdates -gt 0) {
+} elseif ($classCriticalUpdates -gt 0 -and $updatesToApprove -gt 0) {
   # Return OK if user only cared about security updates, else return warning if any critical updates exist
   if ($SecurityOnly) {
     $outputMessage += "OK: $classCriticalUpdates Critical Updates Unapproved | "
     $exitCode = 0
-  } else {
+  } elseif ($classCriticalUpdates -gt 0) {
     $outputMessage += "WARNING: $classCriticalUpdates Critical Updates Unapproved | "
     $exitCode = 1
   }
