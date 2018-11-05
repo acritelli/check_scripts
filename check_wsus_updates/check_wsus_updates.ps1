@@ -75,7 +75,7 @@ if($classSecurityUpdates -gt 0) {
     $outputMessage += "OK: $classCriticalUpdates Critical Updates Unapproved | "
     $exitCode = 0
   } else {
-    $outputMessage += "Warning: $classCriticalUpdates Critical Updates Unapproved | "
+    $outputMessage += "WARNING: $classCriticalUpdates Critical Updates Unapproved | "
     $exitCode = 1
   }
 } else {
@@ -90,7 +90,7 @@ $outputMessage += "'Updates to Approve'=${updatesToApprove} "
 # Write performance data based on PerformanceData command line arg
 $PerformanceData | ForEach-Object -Process {
   Switch ($_) {
-    'Application' { $outputMessage += "'Application'=${classApplications} " }
+    'Applications' { $outputMessage += "'Application'=${classApplications} " }
     'Critical Updates' { $outputMessage += "'Critical Updates'=${classCriticalUpdates} " }
     'Definition Updates' { $outputMessage += "'Definition Updates'=${classDefinitionUpdates} " }
     'Driver Sets' { $outputMessage += "'Driver Sets'=${classDriverSets} " }
