@@ -37,7 +37,7 @@ $outputMessage = ''
 $exitCode = 0
 
 # Initialize all the types of updates available
-$classApplications = $classCriticalUpdates = $classDefinitionUpdates = $classDriverSets = $classDrivers = $classFeaturePacks = $classSecurityUpdates = $classServicePacks = $classTools = $classUpdateRollups = $classUpdates = $classUpgrades = 0
+$classApplications = $classCriticalUpdates = $classDefinitionUpdates = $classDriverSets = $classDrivers = $classFeaturePacks = $classSecurityUpdates = $classServicePacks = $classTools = $classUpdateRollups = $classUpdates = $classUpgrades = $securityUpdatesToApprove = $criticalUpdatesToApprove = 0
 
 
 $updates | ForEach-Object -Process {
@@ -46,6 +46,12 @@ $updates | ForEach-Object -Process {
   # Updates to approve are defined as any updates that are not superseded AND that are needed by computers
   if($_.UpdatesSupersedingThisUpdate -eq 'None' -and $_.ComputersNeedingThisUpdate -gt 0) {
     $updatesToApprove += 1
+
+    if($_.Classification -eq 'Security Updates') {
+      $securityUpdatesToApprove += 1
+    } elseif($_.Classification -eq 'CriticalUpdates') {
+      $criticalUpdatesToApprove += 1
+    }
   }
 
   Switch ($_.Classification) {
@@ -65,17 +71,17 @@ $updates | ForEach-Object -Process {
   }
 }
 
-# Any unapproved security updates will result in critical
-if($classSecurityUpdates -gt 0 -and $updatesToApprove -gt 0) {
-  $outputMessage +=  "CRITICAL: $classSecurityUpdates Security Updates Unapproved | "
+# Any unapproved security update that needs approval will result in critical
+if($securityUpdatesToApprove -gt 0) {
+  $outputMessage +=  "CRITICAL: $securityUpdatesToApprove Security Updates Need Approval | "
   $exitCode = 2
-} elseif ($classCriticalUpdates -gt 0 -and $updatesToApprove -gt 0) {
+} elseif ($criticalUpdatesToApprove -gt 0) {
   # Return OK if user only cared about security updates, else return warning if any critical updates exist
   if ($SecurityOnly) {
-    $outputMessage += "OK: $classCriticalUpdates Critical Updates Unapproved | "
+    $outputMessage += "OK: $criticalUpdatesToApprove Critical Updates Need Approval | "
     $exitCode = 0
-  } elseif ($classCriticalUpdates -gt 0) {
-    $outputMessage += "WARNING: $classCriticalUpdates Critical Updates Unapproved | "
+  } elseif ($criticalUpdatesToApprove -gt 0) {
+    $outputMessage += "WARNING: $criticalUpdatesToApprove Critical Updates Unapproved | "
     $exitCode = 1
   }
 } else {
