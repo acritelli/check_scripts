@@ -31,6 +31,10 @@ The metric to collect and check (CPU or Memory)
 
 Indicates whether performance data is collected for a cluster or a host. Defaults to cluster. If cluster (the default) is specified, then -Cluster must be specified. If host is specified, then -VMHost must be specified.
 
+.PARAMETER Password
+
+A password for connecting to vCenter
+
 .PARAMETER Server
 
 Mandatory. The vCenter server to connect to.
@@ -73,6 +77,7 @@ param(
   [string]$Critical = 75,
   [ValidateSet("CPU", "Memory")][string]$Metric = 'CPU',
   [ValidateSet("Cluster","Host")][string]$Mode = 'Cluster',
+  [string]$Password, # Included for compatibility with Powershell on Linux
   [Parameter(Mandatory=$true)][string]$Server,
   [boolean]$ShowPercentUsed = $true,
   [boolean]$ShowPercentFree = $true,
@@ -95,6 +100,8 @@ if($Username -and $CredentialFile) {
   $password = Get-Content $CredentialFile | ConvertTo-SecureString
   $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username, $password
   Connect-VIServer -Server $Server -Credential $Credential | Out-Null
+} elseif($Username -and $Password) {
+  Connect-VIServer -Server $Server -Username $Username -Password $Password | Out-Null
 } else {
   Connect-VIServer -Server $Server | Out-Null
 }

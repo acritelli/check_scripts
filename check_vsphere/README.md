@@ -12,7 +12,14 @@ check_vsphere is able to check for raw percentage value CPU and memory statistic
 
 Before the script can do anything, it must be connected to vCenter. If you're on a Windows domain bound computer and your user has vCenter access, then the script will simply call `Get-VIServer` with your logged in credentials.
 
-If you need to specify credentials, then you will have to create a password file using the command below:
+If you need to specify credentials, then there are two options:
+
+1. Create a credentials file containing a secure string password. This is described below.
+2. Use the `-Username` and `-Password` parameters. This is **not** ideal and is only included because secure string functionality is broken in Powershell for Linux.
+
+#### Using a credential file
+
+If you want to use a credential file, then you will have to create a password file using the command below:
 
 `Read-Host -AsSecureString | ConvertFrom-SecureString | Out-File C:\mycredentials.txt`
 
