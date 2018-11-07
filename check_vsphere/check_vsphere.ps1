@@ -148,7 +148,7 @@ Switch($Metric) {
     $Metric = 'CPU' # Fix case insensitivity
     $metricRawTotal = $totalCPU
     $metricRawUsed = $usedCPU
-    $metricUnit = 'GHz'
+    $metricUnit = '' # Can't use GHz as a metric unit per Nagios guidelines
   }
 
   'Memory' {
