@@ -255,4 +255,5 @@ if($ShowPercentFree) {
 }
 
 Write-Host $outputMessage
+Disconnect-VIServer -Server $Server -Confirm:$false | Out-Null
 Exit $exitCode
