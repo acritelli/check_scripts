@@ -25,7 +25,7 @@ The critical threshold
 
 .PARAMETER Metric
 
-The metric to collect and check (CPU or Memory)
+The metric to collect and check (CPU, Memory or Datastore)
 
 .PARAMETER Mode
 
@@ -75,7 +75,7 @@ param(
   [string]$Cluster,
   [string]$CredentialFile,
   [string]$Critical = 75,
-  [ValidateSet("CPU", "Memory")][string]$Metric = 'CPU',
+  [ValidateSet("CPU", "Memory", "Datastore")][string]$Metric = 'CPU',
   [ValidateSet("Cluster","Host")][string]$Mode = 'Cluster',
   [string]$Password, # Included for compatibility with Powershell on Linux
   [Parameter(Mandatory=$true)][string]$Server,
@@ -93,6 +93,8 @@ $totalCPU
 $usedCPU
 $totalMemory
 $usedMemory
+$datastoreTotalGB
+$datastoreUsedGB
 
 
 # Connect using provided credentials, else assume that we're binding with logged in user
@@ -127,12 +129,16 @@ Switch($Mode) {
 
   'Host' {
     $esxHost = Get-VMHost -Name $VMHost
+    $esxDatastore = Get-VMHost -Name $VMHost | Get-Datastore
     $totalCPU = $esxHost.CpuTotalMhz
     $usedCPU = $esxHost.CpuUsageMhz
     $totalMemory = $esxHost.MemoryTotalGB
     $usedMemory = $esxHost.MemoryUsageGB
+#    $datastoreName = $esxDatastore.Name
+    $datastoreTotalGB = $esxDatastore.CapacityGB
+    $datastoreFreeGB = $esxDatastore.FreeSpaceGB
+    $datastoreUsedGB = $esxDatastore.CapacityGB - $datastoreFreeGB
   }
-
 }
 
 $metricRawTotal
@@ -141,6 +147,8 @@ $metricRawFree
 $metricPercentFree
 $metricPercentUsed
 $metricUnit
+$metricDatastoreTotalGB
+$metricDatastoreUsedGB
 
 Switch($Metric) {
 
@@ -158,13 +166,21 @@ Switch($Metric) {
     $metricUnit = "GB"
   }
 
+  'Datastore' {
+    $Metric = 'Datastore' # Fix case insensitivity
+    $metricRawTotal = $datastoreTotalGB
+    $metricRawUsed = $datastoreUsedGB
+    $metricUnit = "GB"
+  }
 }
 
-$metricRawFree = $metricRawTotal - $metricRawUsed
-$metricPercentUsed = $metricRawUsed / $metricRawTotal * 100
-$metricPercentFree = ($metricRawTotal - $metricRawUsed) / $metricRawTotal * 100
+$metricRawTotal = [math]::round($metricRawTotal,2)
+$metricRawUsed = [math]::round($metricRawUsed,2)
+$metricRawFree = [math]::round(($metricRawTotal - $metricRawUsed),2)
+$metricPercentUsed = [math]::round(($metricRawUsed / $metricRawTotal * 100),2)
+$metricPercentFree = [math]::round((($metricRawTotal - $metricRawUsed) / $metricRawTotal * 100),2)
 
-$outputMessage = 'OK' # Printed to stdout, OK is overridden if needed
+$outputMessage = "$Metric OK: $metricRawUsed$metricUnit of $metricRawTotal$metricUnit ($metricPercentUsed%) Used" # Printed to stdout, OK is overridden if needed
 $exitCode # Script exit code
 
 #TODO: handle ranges
